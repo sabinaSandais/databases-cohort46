@@ -20,7 +20,7 @@ connection.query(
         university VARCHAR(255),
         date_of_birth DATE,
         h_index INT,
-        gender VARCHAR(255)
+        gender VARCHAR(10)
     )`,
   (err) => {
     if (err) throw err;

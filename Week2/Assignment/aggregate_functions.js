@@ -26,7 +26,27 @@ connection.query(
   }
 );
 
- // Query 3: Average of the h-index of all authors per university.
+// Query 2: Sum of the research papers published by all female authors.
+connection.query(
+  `
+    SELECT SUM(rp_count) AS total_papers_by_female_authors
+    FROM (
+      SELECT COUNT(ap.paper_id) AS rp_count
+      FROM authors AS a
+      LEFT JOIN author_Paper AS ap ON a.author_id = ap.author_id
+      WHERE a.gender = 'Female'
+      GROUP BY a.author_id
+    ) AS female_paper_counts`,
+  (err, results) => {
+    if (err) throw err;
+    console.log(
+      "Total Research Papers by Female Authors:",
+      results[0].total_papers_by_female_authors
+    );
+  }
+);
+
+// Query 3: Average of the h-index of all authors per university.
 connection.query(
   `
     SELECT university, AVG(h_index) AS avg_h_index
@@ -39,13 +59,12 @@ connection.query(
   }
 );
 
- // Query 4: Sum of the research papers of the authors per university.
 connection.query(
   `
     SELECT a.university, SUM(rp_count) AS total_papers
     FROM authors AS a
     LEFT JOIN (
-      SELECT ap.author_id, COUNT(ap.paper_id) AS rp_count
+      SELECT ap.author_id, COUNT(DISTINCT ap.paper_id) AS rp_count
       FROM author_Paper AS ap
       GROUP BY ap.author_id
     ) AS author_paper_counts ON a.author_id = author_paper_counts.author_id
