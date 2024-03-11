@@ -1,18 +1,68 @@
-const MongoClient = require("mongodb").MongoClient;
-require("dotenv").config(); // Load environment variables from .env file
+const { MongoClient } = require("mongodb");
+require("dotenv").config();
 
-// MongoDB connection URI from .env file
-const uri = process.env.MONGODB_URL;
-console.log("MongoDB URI:", uri);
+const fs = require("fs");
+const csv = require("csv-parser");
+async function main() {
+  const uri = process.env.MONGODB_URL;
+  const client = new MongoClient(uri);
 
-// Create a MongoDB client
-const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    console.log("Connected to the server");
 
-// Connect to MongoDB
-client.connect((err) => {
-  if (err) {
-    console.error(err);
-    return;
+    const database = client.db("databaseWeek4");
+    const collectionName = "Data_Aggregate"; // Choose a name for your collection
+
+    const filePath = "./population_pyramid_1950-2022.csv";
+
+    // Read CSV and import data into MongoDB
+    await importCSVDataToMongoDB(database, collectionName, filePath, client);
+
+    console.log("Data import completed");
+  } catch (error) {
+    console.error(error);
+  } finally {
+    // Close the client connection
+    await client.close();
+    console.log("Connection closed");
   }
-  console.log("Connected to MongoDB");
-});
+}
+
+async function importCSVDataToMongoDB(db, collectionName, filePath, client) {
+  const documents = [];
+
+  // Read the CSV file
+  await new Promise((resolve, reject) => {
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (row) => {
+        // Convert CSV row to MongoDB document
+        const document = {
+          Country: row.Country,
+          Year: parseInt(row.Year),
+          Age: row.Age,
+          M: parseInt(row.M),
+          F: parseInt(row.F),
+        };
+        documents.push(document);
+      })
+      .on("end", () => {
+        resolve();
+      })
+      .on("error", (error) => {
+        reject(error);
+      });
+  });
+
+  try {
+    // Insert all documents into the MongoDB collection
+    await db.collection(collectionName).insertMany(documents);
+    console.log("CSV file successfully imported into MongoDB");
+  } catch (error) {
+    console.error("Error inserting documents:", error);
+  }
+}
+
+main().catch(console.error);
+
