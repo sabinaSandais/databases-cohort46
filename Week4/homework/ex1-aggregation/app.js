@@ -1,9 +1,8 @@
-import { MongoClient } from "mongodb";
-import fs from "fs";
-import csv from "csv-parser";
-import dotenv from "dotenv";
-import { getTotalPopulationByCountry } from "./totalPopulation.js";
-import { getContinentInfoByYearAndAge } from "./continent-info.js";
+const { MongoClient } = require("mongodb");
+const fs = require("fs");
+const csv = require("csv-parser");
+const dotenv = require("dotenv");
+
 dotenv.config();
 
 async function main() {
@@ -23,16 +22,9 @@ async function main() {
     await importCSVDataToMongoDB(database, collectionName, filePath, client);
 
     console.log("Data import completed");
-    //Call the function to get the total population for a specific country
-    const totalPopulation = await getTotalPopulationByCountry(
-      database,
-      "Netherlands"
-    );
-    console.log("Total population for Netherlands:", totalPopulation);
   } catch (error) {
     console.error(error);
   } finally {
-    // Close the client connection
     await client.close();
     console.log("Connection closed");
   }

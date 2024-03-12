@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "type": "module",
   "dependencies": {
     "bson": "^6.4.0",
     "csv-parser": "^3.0.0",

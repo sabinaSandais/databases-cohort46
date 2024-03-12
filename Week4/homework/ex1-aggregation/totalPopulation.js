@@ -1,3 +1,6 @@
+const { MongoClient } = require("mongodb");
+const dotenv = require("dotenv");
+dotenv.config();
 async function getTotalPopulationByCountry(db, country) {
   const pipeline = [
     {
@@ -25,4 +28,24 @@ async function getTotalPopulationByCountry(db, country) {
     .toArray();
   return result;
 }
-export { getTotalPopulationByCountry };
+
+async function main() {
+  const uri = process.env.MONGODB_URL;
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    console.log("Connected to the server");
+    const totalPopulation = await getTotalPopulationByCountry(
+      client.db("databaseWeek4"),
+      "Netherlands"
+    );
+    console.log("Total population for Netherlands:", totalPopulation);
+  } catch (error) {
+    console.error(error);
+  } finally {
+   
+    await client.close();
+    console.log("Connection closed");
+  }
+}
+main();
