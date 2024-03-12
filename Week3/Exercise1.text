@@ -48,3 +48,8 @@
     Primary Key (dinner_id, food_code)
     dinner_id (Foreign Key references Dinners Table)
     food_code (Foreign Key references Foods Table)
+
+-Reservations Table:
+    reservation_id (Primary Key)
+    member_id (Foreign Key references Members Table)
+    dinner_id (Foreign Key references Dinners Table)
